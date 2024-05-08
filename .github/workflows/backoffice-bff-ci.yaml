@@ -13,7 +13,7 @@ on:
       - "backoffice-bff/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-bff-ci.yaml"
-      
+
   workflow_dispatch:
 
 jobs:
@@ -44,4 +44,4 @@ jobs:
         with:
           context: ./backoffice-bff
           push: true
-          tags: ghcr.io/nashtech-garage/yas-backoffice-bff:latest
+          tags: ghcr.io/ck/yas-backoffice-bff:latest

@@ -13,7 +13,7 @@ on:
       - "storefront-bff/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-bff-ci.yaml"
-      
+
   workflow_dispatch:
 
 jobs:
@@ -44,4 +44,4 @@ jobs:
         with:
           context: ./storefront-bff
           push: true
-          tags: ghcr.io/nashtech-garage/yas-storefront-bff:latest
+          tags: ghcr.io/ck/yas-storefront-bff:latest
