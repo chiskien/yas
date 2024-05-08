@@ -44,4 +44,4 @@ jobs:
         with:
           context: ./backoffice-bff
           push: true
-          tags: ghcr.io/ck/yas-backoffice-bff:latest
+          tags: ghcr.io/nashtech-garage/yas-backoffice-bff:latest
