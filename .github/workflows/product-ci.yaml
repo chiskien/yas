@@ -13,7 +13,7 @@ on:
       - "product/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/product-ci.yaml"
-      
+
   workflow_dispatch:
 
 jobs:
@@ -35,11 +35,6 @@ jobs:
           name: Product-Service-Unit-Test-Results
           path: "product/**/surefire-reports/*.xml"
           reporter: java-junit
-      - name: Analyze with sonar cloud
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f product
       - name: Log in to the Container registry
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/login-action@v2
@@ -53,4 +48,4 @@ jobs:
         with:
           context: ./product
           push: true
-          tags: ghcr.io/nashtech-garage/yas-product:latest
+          tags: ghcr.io/chiskien/yas-product:latest

@@ -17,6 +17,7 @@ import com.yas.product.viewmodel.productattribute.ProductAttributeValueVm;
 import com.yas.product.viewmodel.productoption.ProductOptionValuePostVm;
 import com.yas.product.viewmodel.productoption.ProductOptionValuePutVm;
 import com.yas.saga.product.command.ProductQuantityItem;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional
 public class ProductService {
     private final ProductRepository productRepository;
@@ -105,17 +107,24 @@ public class ProductService {
     private void validateIfProductWithSkuOrGtinOrSlugExist(String slug,
                                                            String gtin,
                                                            String sku) {
-        if (isProductWithSlugAvailable(slug))
+        if (isProductWithSlugAvailable(slug)) {
+            log.error("{error: {}, duplicate slug: {}", Constants.ERROR_CODE.SLUG_ALREADY_EXISTED, slug);
             throw new DuplicatedException(Constants.ERROR_CODE.SLUG_ALREADY_EXISTED, slug);
+        }
 
-        if (isProductWithGtinAvailable(gtin))
+        if (isProductWithGtinAvailable(gtin)) {
+            log.error("{error: {}, duplicate gtin: {}", Constants.ERROR_CODE.GTIN_ALREADY_EXISTED, gtin);
             throw new DuplicatedException(Constants.ERROR_CODE.GTIN_ALREADY_EXISTED, gtin);
+        }
 
-        if (isProductWithSkuAvailable(sku))
+        if (isProductWithSkuAvailable(sku)) {
+            log.error("{error: {}, duplicate sku: {}", Constants.ERROR_CODE.SKU_ALREADY_EXISTED, sku);
             throw new DuplicatedException(Constants.ERROR_CODE.SKU_ALREADY_EXISTED, sku);
+        }
     }
 
     public ProductGetDetailVm createProduct(ProductPostVm productPostVm) {
+        log.info("Start creating new product with name: {}", productPostVm.name());
         validateIfProductWithSkuOrGtinOrSlugExist(
                 productPostVm.slug(),
                 productPostVm.gtin(),
@@ -223,7 +232,7 @@ public class ProductService {
             productOptionValueRepository.saveAllAndFlush(productOptionValues);
             productOptionCombinationRepository.saveAllAndFlush(productOptionCombinations);
         }
-
+        log.info("Product with {} is created", mainProduct);
         return ProductGetDetailVm.fromModel(mainSavedProduct);
     }
 
@@ -862,22 +871,22 @@ public class ProductService {
     private void partitionUpdateStockQuantityByCalculation(List<ProductQuantityItem> productQuantityItems,
                                                            BiFunction<Long, Integer, Long> calculation) {
         var productIds = productQuantityItems.stream()
-            .map(ProductQuantityItem::productId)
-            .toList();
+                .map(ProductQuantityItem::productId)
+                .toList();
 
         var productQuantityItemMap = productQuantityItems.stream()
-            .collect(Collectors.toMap(
-                ProductQuantityItem::productId,
-                Function.identity(),
-                this::mergeProductQuantityItem
-            ));
+                .collect(Collectors.toMap(
+                        ProductQuantityItem::productId,
+                        Function.identity(),
+                        this::mergeProductQuantityItem
+                ));
 
 
         List<Product> products = this.productRepository.findAllByIdIn(productIds);
         products.forEach(product -> {
             if (product.isStockTrackingEnabled()) {
-               long amount = getRemainAmountOfStockQuantity(productQuantityItemMap, product, calculation);
-               product.setStockQuantity(amount);
+                long amount = getRemainAmountOfStockQuantity(productQuantityItemMap, product, calculation);
+                product.setStockQuantity(amount);
             }
         });
         this.productRepository.saveAll(products);
