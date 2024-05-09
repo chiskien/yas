@@ -232,7 +232,7 @@ public class ProductService {
             productOptionValueRepository.saveAllAndFlush(productOptionValues);
             productOptionCombinationRepository.saveAllAndFlush(productOptionCombinations);
         }
-        log.info("Product with {} is created", mainProduct);
+        log.info("Product with name: {} is created", mainProduct.getName());
         return ProductGetDetailVm.fromModel(mainSavedProduct);
     }
 
